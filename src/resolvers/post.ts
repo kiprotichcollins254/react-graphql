@@ -1,6 +1,8 @@
 import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Int, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import { RequiredEntityData } from "@mikro-orm/core";
+// import { title } from "process";
 
 @Resolver()
 export class PostResolver{
@@ -15,5 +17,15 @@ export class PostResolver{
     @Arg('identifier',()=>Int) id : number,
     @Ctx() {em} : MyContext):Promise<Post | null>{
        return em.findOne(Post,{id})
+   }
+
+//    @Mutation - used for updating, inserting i.e changing data
+   @Mutation(()=>Post)
+   async createPost(
+    @Arg('title') title : string,
+    @Ctx() {em} : MyContext):Promise<Post>{
+        const post = em.create(Post,{title} as RequiredEntityData<Post>);
+        await em.persistAndFlush(post);
+        return post;
    }
 }
